@@ -8,8 +8,8 @@ require('../../../TestHelper');
 var modelingModule = require('../../../../lib/features/modeling'),
     bendpointsModule = require('../../../../lib/features/bendpoints'),
     rulesModule = require('./rules'),
-    interactionModule = require('../../../../lib/features/interaction-events');
-
+    interactionModule = require('../../../../lib/features/interaction-events'),
+    canvasEvent = require('../../../util/MockEvents').createCanvasEvent;
 
 describe('features/bendpoints', function() {
 
@@ -100,6 +100,63 @@ describe('features/bendpoints', function() {
       expect(layer.node.querySelectorAll('.djs-bendpoint').length).to.equal(4);
     }));
 
-  });
 
+    it('should not show parallel indicator', inject(function(eventBus, canvas, elementRegistry) {
+
+      // given
+      var layer = canvas.getLayer('overlays');
+
+      // when
+      eventBus.fire('element.hover', { element: connection, gfx: elementRegistry.getGraphics(connection) });
+      eventBus.fire('element.mousemove', {
+        element: connection,
+        originalEvent: {clientX:300, clientY:250}
+      });
+
+      // then: floating bendpoint is shown
+      expect(layer.node.querySelectorAll('.floating').length).to.equal(1);
+      expect(layer.node.querySelectorAll('.floating.center').length).to.equal(0);
+    }));
+
+
+    it('should show parallel indicator', inject(function(eventBus, canvas, elementRegistry) {
+
+      // given
+      var layer = canvas.getLayer('overlays');
+
+      // when
+      eventBus.fire('element.hover', { element: connection, gfx: elementRegistry.getGraphics(connection) });
+
+      eventBus.fire('element.mousemove', {
+        element: connection,
+        originalEvent: canvasEvent({x:391, y:250})
+      });
+
+      // then parallel movement indicator is shown
+      expect(layer.node.querySelectorAll('.floating').length).to.equal(1);
+      expect(layer.node.querySelectorAll('.floating.center').length).to.equal(1);
+
+      // move out of 10px range (square should be hidden)
+      eventBus.fire('element.mousemove', {
+        element: connection,
+        originalEvent: canvasEvent({x:390, y:250})
+      });
+      expect(layer.node.querySelectorAll('.floating.center').length).to.equal(0);
+
+      // other side of the range (square should be visible)
+      eventBus.fire('element.mousemove', {
+        element: connection,
+        originalEvent: canvasEvent({x:409, y:250})
+      });
+      expect(layer.node.querySelectorAll('.floating.center').length).to.equal(1);
+
+      // exactly the middle (square should be visible)
+      eventBus.fire('element.mousemove', {
+        element: connection,
+        originalEvent: canvasEvent({x:400, y:250})
+      });
+      expect(layer.node.querySelectorAll('.floating.center').length).to.equal(1);
+
+    }));
+  });
 });

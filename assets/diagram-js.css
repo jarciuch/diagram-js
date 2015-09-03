@@ -445,6 +445,26 @@ svg.drop-not-ok {
   display: none;
 }
 
+.djs-bendpoints .floating rect.djs-visual {
+  visibility: hidden;
+}
+
+.djs-bendpoints .floating circle.djs-visual {
+  visibility: visible;
+}
+
+.djs-bendpoints .floating.center.vertical rect.vertical.djs-visual {
+  visibility: visible;
+}
+
+.djs-bendpoints .floating.center.horizontal rect.horizontal.djs-visual {
+  visibility: visible;
+}
+
+.djs-bendpoints .floating.center circle.djs-visual {
+  visibility: hidden;
+}
+
 .djs-bendpoint:hover .djs-visual,
 .djs-bendpoint.floating .djs-visual {
   fill: yellow;
