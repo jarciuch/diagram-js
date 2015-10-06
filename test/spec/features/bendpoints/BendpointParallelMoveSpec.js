@@ -58,76 +58,89 @@ describe('features/bendpoints - parallel move', function() {
 
   }));
 
-  describe('modeling', function() {
 
-    it('should update first/last bendpoint with original points',
+  describe.only('modeling', function() {
+
+    it('should vertical move first segment, updating connection start',
        inject(function(canvas, bendpointParallelMove, dragging) {
 
-      // when first intersection is dragged
+      // given
+      var oldStart = connection.waypoints[0];
+
+      // when
       bendpointParallelMove.start(canvasEvent({ x: 275, y: 450 }), connection, 1);
       dragging.move(canvasEvent({ x: 275, y: 430}));
       dragging.end();
 
-      // when last intersection is dragged
+      // then
+      expect(connection).to.have.waypoints([
+        { x: 300, y: 430 },
+        { x: 400, y: 430 },
+        { x: 400, y: 150 },
+        { x: 600, y: 150 }
+      ]);
+
+      expect(connection).to.have.startDocking({ x: oldStart.original.x, y: 430 });
+    }));
+
+
+    it('should vertical move last segment, updating connection end',
+       inject(function(canvas, bendpointParallelMove, dragging) {
+
+      // given
+      var oldEnd = connection.waypoints[3];
+
+      // when
       bendpointParallelMove.start(canvasEvent({ x: 425, y: 150 }), connection, 3);
-      dragging.move(canvasEvent({ x: 425, y: 210}));
+      dragging.move(canvasEvent({ x: 425, y: 210 }));
       dragging.end();
 
       // then
-      expect(connection.waypoints[0].original).to.eql({x:200, y:450});
-      expect(connection.waypoints[3].original).to.eql({x:650, y:150});
+      expect(connection).to.have.waypoints([
+        { x: 300, y: 450 },
+        { x: 400, y: 450 },
+        { x: 400, y: 210 },
+        { x: 600, y: 210 }
+      ]);
+
+      expect(connection).to.have.endDocking({ x: oldEnd.original.x, y: 210 });
     }));
 
-    it('should move first/last bendpoint to appropriate edges',
+
+    it('should add new segment, left of start shape',
        inject(function(canvas, bendpointParallelMove, dragging) {
 
-      // when first intersection is dragged
-      bendpointParallelMove.start(canvasEvent({ x: 275, y: 450 }), connection, 1);
-      dragging.move(canvasEvent({ x: 275, y: 430}));
-      dragging.end();
+      // given
+      var oldWaypoints = connection.waypoints,
+          oldStart = oldWaypoints[0],
+          expectedWaypoints = [
+            { x: 100, y: 450 },
+            { x: 50, y: 450 },
+            { x: 50, y: 150 },
+            oldWaypoints[2]
+          ];
 
-      // when last intersection is dragged
-      bendpointParallelMove.start(canvasEvent({ x: 425, y: 150 }), connection, 3);
-      dragging.move(canvasEvent({ x: 425, y: 210}));
-      dragging.end();
-
-      // then
-      expect(connection.waypoints[0].x).to.eql(300);
-      expect(connection.waypoints[0].y).to.eql(430);
-
-      expect(connection.waypoints[3].x).to.eql(600);
-      expect(connection.waypoints[3].y).to.eql(210);
-    }));
-
-    it('can handle lefties',
-       inject(function(canvas, bendpointParallelMove, dragging) {
-
-      // precondition: drag middle to the left
+      // when
+      // moving mid segment left of start shape
       bendpointParallelMove.start(canvasEvent({ x: 400, y: 200 }), connection, 2);
       dragging.move(canvasEvent({ x: 50, y: 200}));
       dragging.end();
 
-      // when first intersection is dragged
-      bendpointParallelMove.start(canvasEvent({ x: 75, y: 450 }), connection, 1);
-      dragging.move(canvasEvent({ x: 75, y: 430}));
-      dragging.end();
-
       // then
-      expect(connection.waypoints[0].x).to.eql(100);
-      expect(connection.waypoints[0].y).to.eql(430);
+      expect(connection).to.have.waypoints(expectedWaypoints);
+      expect(connection).to.have.startDocking(oldStart.original);
     }));
 
-    it('can handle righties',
+
+    it('should add new segment, right of end shape',
        inject(function(canvas, bendpointParallelMove, dragging) {
+
+      // given
+      var oldEnd = connection.waypoints[3];
 
       // precondition: drag middle to the left
       bendpointParallelMove.start(canvasEvent({ x: 400, y: 200 }), connection, 2);
       dragging.move(canvasEvent({ x: 750, y: 200}));
-      dragging.end();
-
-      // when last intersection is dragged
-      bendpointParallelMove.start(canvasEvent({ x: 725, y: 150 }), connection, 3);
-      dragging.move(canvasEvent({ x: 725, y: 210}));
       dragging.end();
 
       // then
@@ -145,7 +158,7 @@ describe('features/bendpoints - parallel move', function() {
 
       // then
       expect(connection.waypoints[2].x).to.eql(620);
-    expect(connection.waypoints[2].y).to.eql(250);
+      expect(connection.waypoints[2].y).to.eql(250);
     }));
 
     it('should update lower bendpoint on horizontal movement',
@@ -187,10 +200,10 @@ describe('features/bendpoints - parallel move', function() {
         dragging.end();
       });
 
-      
+
       expect(connection.waypoints.length).to.eql(11);
     }));
-        
+
     // see issue #367
     it.skip('keeps the other axis',
        inject(function(canvas, bendpointParallelMove, dragging) {
