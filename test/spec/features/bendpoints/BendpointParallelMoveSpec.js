@@ -111,13 +111,12 @@ describe('features/bendpoints - parallel move', function() {
        inject(function(canvas, bendpointParallelMove, dragging) {
 
       // given
-      var oldWaypoints = connection.waypoints,
-          oldStart = oldWaypoints[0],
+      var oldStart = connection.waypoints[0],
           expectedWaypoints = [
             { x: 100, y: 450 },
             { x: 50, y: 450 },
             { x: 50, y: 150 },
-            oldWaypoints[2]
+            { x: 600, y: 150 }
           ];
 
       // when
@@ -136,7 +135,14 @@ describe('features/bendpoints - parallel move', function() {
        inject(function(canvas, bendpointParallelMove, dragging) {
 
       // given
-      var oldEnd = connection.waypoints[3];
+      var oldEnd = connection.waypoints[3],
+          expectedWaypoints = [
+            { x: 300, y: 450 },
+            { x: 750, y: 450 },
+            { x: 750, y: 150 },
+            { x: 700, y: 150 }
+          ];
+
 
       // precondition: drag middle to the left
       bendpointParallelMove.start(canvasEvent({ x: 400, y: 200 }), connection, 2);
@@ -144,8 +150,8 @@ describe('features/bendpoints - parallel move', function() {
       dragging.end();
 
       // then
-      expect(connection.waypoints[3].x).to.eql(700);
-      expect(connection.waypoints[3].y).to.eql(210);
+      expect(connection).to.have.waypoints(expectedWaypoints);
+      expect(connection).to.have.startDocking(oldEnd.original);
     }));
 
     it('should update upper bendpoint on horizontal movement',
@@ -175,37 +181,8 @@ describe('features/bendpoints - parallel move', function() {
       expect(connection.waypoints.length).to.eql(3);
     }));
 
-    it('should enlight with a spiral',
-       inject(function(canvas, bendpointParallelMove, dragging) {
-
-      // precondition: lets create a fancy spiral
-      var l = [
-        // intersection, from position, to position
-        [1, {x:275, y:450}, {x:275, y:570}],
-        [1, {x:275, y:570}, {x:5,   y:570}],
-        [1, {x:15,  y:450}, {x:15,  y:330}],
-        [1, {x:150, y:350}, {x:390, y:350}],
-        [1, {x:350, y:350}, {x:350, y:560}],
-        [1, {x:150, y:330}, {x:15,  y:330}],
-        [1, {x:25,  y:450}, {x:25,  y:340}],
-      ];
-
-      l.forEach(function(cmd) {
-        var i = cmd[0],
-            startPosition = cmd[1],
-            targetPosition = cmd[2];
-
-        bendpointParallelMove.start(canvasEvent(startPosition), connection, i);
-        dragging.move(canvasEvent(targetPosition));
-        dragging.end();
-      });
-
-
-      expect(connection.waypoints.length).to.eql(11);
-    }));
-
     // see issue #367
-    it.skip('keeps the other axis',
+    it('keeps the other axis',
        inject(function(canvas, bendpointParallelMove, dragging) {
 
       // precondition: drag last intersection down a bit
