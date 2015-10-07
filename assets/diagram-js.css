@@ -445,7 +445,12 @@ svg.drop-not-ok {
   display: none;
 }
 
+.layer-overlays .floating.djs-dragging rect.djs-visual,
 .djs-bendpoints .floating rect.djs-visual {
+  visibility: hidden;
+}
+
+.layer-overlays .floating.djs-dragging circle.djs-visual {
   visibility: hidden;
 }
 
@@ -453,14 +458,17 @@ svg.drop-not-ok {
   visibility: visible;
 }
 
+.layer-overlays .floating.djs-dragging.vertical rect.vertical.djs-visual,
 .djs-bendpoints .floating.center.vertical rect.vertical.djs-visual {
   visibility: visible;
 }
 
+.layer-overlays .floating.djs-dragging.horizontal rect.horizontal.djs-visual,
 .djs-bendpoints .floating.center.horizontal rect.horizontal.djs-visual {
   visibility: visible;
 }
 
+.layer-overlays .floating.djs-dragging circle.djs-visual,
 .djs-bendpoints .floating.center circle.djs-visual {
   visibility: hidden;
 }
