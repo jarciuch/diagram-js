@@ -151,8 +151,9 @@ describe('features/bendpoints - parallel move', function() {
 
       // then
       expect(connection).to.have.waypoints(expectedWaypoints);
-      expect(connection).to.have.startDocking(oldEnd.original);
+      expect(connection).to.have.endDocking(oldEnd.original);
     }));
+
 
     it('should update upper bendpoint on horizontal movement',
        inject(function(canvas, bendpointParallelMove, dragging) {
@@ -167,6 +168,7 @@ describe('features/bendpoints - parallel move', function() {
       expect(connection.waypoints[2].y).to.eql(250);
     }));
 
+
     it('should update lower bendpoint on horizontal movement',
        inject(function(canvas, bendpointParallelMove, dragging) {
 
@@ -180,6 +182,7 @@ describe('features/bendpoints - parallel move', function() {
       expect(connection.waypoints[0].y).to.eql(400);
       expect(connection.waypoints.length).to.eql(3);
     }));
+
 
     // see issue #367
     it('keeps the other axis',
@@ -200,6 +203,40 @@ describe('features/bendpoints - parallel move', function() {
       expect(connection.waypoints[3].y).to.eql(210);
     }));
 
-  });
 
+    it('keeps the start docking as long as needed',
+       inject(function(canvas, bendpointParallelMove, dragging) {
+
+      // precondition:
+      var wp0 = connection.waypoints[0];
+      var originalDocking = {x: 150, y: 450};
+      wp0.original = {x: 150, y: 450};
+
+      // when: dragging intersection out of the element
+      bendpointParallelMove.start(canvasEvent({ x: 275, y: 450 }), connection, 1);
+      dragging.move(canvasEvent({ x: 275, y: 350}));
+      dragging.end();
+
+      // then: the docking point needs to stay untouched
+      expect(connection).to.have.startDocking(originalDocking);
+    }));
+
+
+    it('keeps the end docking as long as needed',
+       inject(function(canvas, bendpointParallelMove, dragging) {
+
+      // precondition:
+      var wpLast = connection.waypoints[connection.waypoints.length - 1];
+      var originalDocking = {x: 680, y: 150};
+      wpLast.original = {x: 680, y: 150};
+
+      // when: dragging intersection out of the element
+      bendpointParallelMove.start(canvasEvent({ x: 425, y: 150 }), connection, 3);
+      dragging.move(canvasEvent({ x: 425, y: 300 }));
+      dragging.end();
+
+      // then: the docking point needs to stay untouched
+      expect(connection).to.have.endDocking(originalDocking);
+    }));
+  });
 });
