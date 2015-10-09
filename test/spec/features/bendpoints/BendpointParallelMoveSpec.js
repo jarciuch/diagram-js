@@ -59,7 +59,7 @@ describe('features/bendpoints - parallel move', function() {
   }));
 
 
-  describe.only('modeling', function() {
+  describe('modeling', function() {
 
     it('should vertical move first segment, updating connection start',
        inject(function(canvas, bendpointParallelMove, dragging) {
