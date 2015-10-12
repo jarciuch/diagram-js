@@ -11,7 +11,7 @@ var modelingModule = require('../../../../lib/features/modeling'),
     interactionModule = require('../../../../lib/features/interaction-events'),
     canvasEvent = require('../../../util/MockEvents').createCanvasEvent;
 
-describe.only('features/bendpoints', function() {
+describe('features/bendpoints', function() {
 
   beforeEach(bootstrapDiagram({ modules: [ modelingModule, bendpointsModule, interactionModule, rulesModule ] }));
 
