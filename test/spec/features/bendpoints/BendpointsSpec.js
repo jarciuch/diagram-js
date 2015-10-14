@@ -8,8 +8,7 @@ require('../../../TestHelper');
 var modelingModule = require('../../../../lib/features/modeling'),
     bendpointsModule = require('../../../../lib/features/bendpoints'),
     rulesModule = require('./rules'),
-    interactionModule = require('../../../../lib/features/interaction-events'),
-    canvasEvent = require('../../../util/MockEvents').createCanvasEvent;
+    interactionModule = require('../../../../lib/features/interaction-events');
 
 describe('features/bendpoints', function() {
 
@@ -101,5 +100,9 @@ describe('features/bendpoints', function() {
       expect(layer.node.querySelectorAll('.djs-bendpoint').length).to.equal(4);
       expect(layer.node.querySelectorAll('.djs-dragmarker').length).to.equal(2);
     }));
+
   });
+
+
+  // TODO(nre): test cases for triggering bendpoint move VS. connection segment move
 });

@@ -62,13 +62,13 @@ describe('features/bendpoints - parallel move', function() {
   describe('modeling', function() {
 
     it('should vertical move first segment, updating connection start',
-       inject(function(canvas, bendpointParallelMove, dragging) {
+       inject(function(canvas, connectionSegmentMove, dragging) {
 
       // given
       var oldStart = connection.waypoints[0];
 
       // when
-      bendpointParallelMove.start(canvasEvent({ x: 275, y: 450 }), connection, 1);
+      connectionSegmentMove.start(canvasEvent({ x: 275, y: 450 }), connection, 1);
       dragging.move(canvasEvent({ x: 275, y: 430}));
       dragging.end();
 
@@ -85,13 +85,13 @@ describe('features/bendpoints - parallel move', function() {
 
 
     it('should vertical move last segment, updating connection end',
-       inject(function(canvas, bendpointParallelMove, dragging) {
+       inject(function(canvas, connectionSegmentMove, dragging) {
 
       // given
       var oldEnd = connection.waypoints[3];
 
       // when
-      bendpointParallelMove.start(canvasEvent({ x: 425, y: 150 }), connection, 3);
+      connectionSegmentMove.start(canvasEvent({ x: 425, y: 150 }), connection, 3);
       dragging.move(canvasEvent({ x: 425, y: 210 }));
       dragging.end();
 
@@ -108,7 +108,7 @@ describe('features/bendpoints - parallel move', function() {
 
 
     it('should add new segment, left of start shape',
-       inject(function(canvas, bendpointParallelMove, dragging) {
+       inject(function(canvas, connectionSegmentMove, dragging) {
 
       // given
       var oldStart = connection.waypoints[0],
@@ -121,7 +121,7 @@ describe('features/bendpoints - parallel move', function() {
 
       // when
       // moving mid segment left of start shape
-      bendpointParallelMove.start(canvasEvent({ x: 400, y: 200 }), connection, 2);
+      connectionSegmentMove.start(canvasEvent({ x: 400, y: 200 }), connection, 2);
       dragging.move(canvasEvent({ x: 50, y: 200}));
       dragging.end();
 
@@ -132,7 +132,7 @@ describe('features/bendpoints - parallel move', function() {
 
 
     it('should add new segment, right of end shape',
-       inject(function(canvas, bendpointParallelMove, dragging) {
+       inject(function(canvas, connectionSegmentMove, dragging) {
 
       // given
       var oldEnd = connection.waypoints[3],
@@ -145,7 +145,7 @@ describe('features/bendpoints - parallel move', function() {
 
 
       // precondition: drag middle to the left
-      bendpointParallelMove.start(canvasEvent({ x: 400, y: 200 }), connection, 2);
+      connectionSegmentMove.start(canvasEvent({ x: 400, y: 200 }), connection, 2);
       dragging.move(canvasEvent({ x: 750, y: 200}));
       dragging.end();
 
@@ -156,10 +156,10 @@ describe('features/bendpoints - parallel move', function() {
 
 
     it('should update upper bendpoint on horizontal movement',
-       inject(function(canvas, bendpointParallelMove, dragging) {
+       inject(function(canvas, connectionSegmentMove, dragging) {
 
       // precondition: drag middle to the left
-      bendpointParallelMove.start(canvasEvent({ x: 400, y: 200 }), connection, 2);
+      connectionSegmentMove.start(canvasEvent({ x: 400, y: 200 }), connection, 2);
       dragging.move(canvasEvent({ x: 620, y: 200}));
       dragging.end();
 
@@ -170,10 +170,10 @@ describe('features/bendpoints - parallel move', function() {
 
 
     it('should update lower bendpoint on horizontal movement',
-       inject(function(canvas, bendpointParallelMove, dragging) {
+       inject(function(canvas, connectionSegmentMove, dragging) {
 
       // precondition: drag middle to the left
-      bendpointParallelMove.start(canvasEvent({ x: 400, y: 200 }), connection, 2);
+      connectionSegmentMove.start(canvasEvent({ x: 400, y: 200 }), connection, 2);
       dragging.move(canvasEvent({ x: 280, y: 200}));
       dragging.end();
 
@@ -186,15 +186,15 @@ describe('features/bendpoints - parallel move', function() {
 
     // see issue #367
     it('keeps the other axis',
-       inject(function(canvas, bendpointParallelMove, dragging) {
+       inject(function(canvas, connectionSegmentMove, dragging) {
 
       // precondition: drag last intersection down a bit
-      bendpointParallelMove.start(canvasEvent({ x: 425, y: 150 }), connection, 3);
+      connectionSegmentMove.start(canvasEvent({ x: 425, y: 150 }), connection, 3);
       dragging.move(canvasEvent({ x: 425, y: 210}));
       dragging.end();
       // when: middle intersection is dragged to the left
       //       multiple steps are needed because it needs to pass the shape
-      bendpointParallelMove.start(canvasEvent({ x: 400, y: 300 }), connection, 2);
+      connectionSegmentMove.start(canvasEvent({ x: 400, y: 300 }), connection, 2);
       dragging.move(canvasEvent({ x: 650, y: 300}));
       dragging.move(canvasEvent({ x: 750, y: 300}));
       dragging.end();
@@ -205,7 +205,7 @@ describe('features/bendpoints - parallel move', function() {
 
 
     it('keeps the start docking as long as needed',
-       inject(function(canvas, bendpointParallelMove, dragging) {
+       inject(function(canvas, connectionSegmentMove, dragging) {
 
       // precondition:
       var wp0 = connection.waypoints[0];
@@ -213,7 +213,7 @@ describe('features/bendpoints - parallel move', function() {
       wp0.original = {x: 150, y: 450};
 
       // when: dragging intersection out of the element
-      bendpointParallelMove.start(canvasEvent({ x: 275, y: 450 }), connection, 1);
+      connectionSegmentMove.start(canvasEvent({ x: 275, y: 450 }), connection, 1);
       dragging.move(canvasEvent({ x: 275, y: 350}));
       dragging.end();
 
@@ -223,7 +223,7 @@ describe('features/bendpoints - parallel move', function() {
 
 
     it('keeps the end docking as long as needed',
-       inject(function(canvas, bendpointParallelMove, dragging) {
+       inject(function(canvas, connectionSegmentMove, dragging) {
 
       // precondition:
       var wpLast = connection.waypoints[connection.waypoints.length - 1];
@@ -231,12 +231,14 @@ describe('features/bendpoints - parallel move', function() {
       wpLast.original = {x: 680, y: 150};
 
       // when: dragging intersection out of the element
-      bendpointParallelMove.start(canvasEvent({ x: 425, y: 150 }), connection, 3);
+      connectionSegmentMove.start(canvasEvent({ x: 425, y: 150 }), connection, 3);
       dragging.move(canvasEvent({ x: 425, y: 300 }));
       dragging.end();
 
       // then: the docking point needs to stay untouched
       expect(connection).to.have.endDocking(originalDocking);
     }));
+
   });
+
 });
