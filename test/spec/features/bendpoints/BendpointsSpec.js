@@ -77,12 +77,12 @@ describe('features/bendpoints', function() {
   describe('activation', function() {
 
     beforeEach(inject(function(bendpoints) {
-      sinon.spy(bendpoints, 'moveIntersection');
+      sinon.spy(bendpoints, 'moveConnectionSegment');
       sinon.spy(bendpoints, 'moveBendpoint');
     }));
 
     afterEach(inject(function(bendpoints) {
-      bendpoints.moveIntersection.restore();
+      bendpoints.moveConnectionSegment.restore();
       bendpoints.moveBendpoint.restore();
     }));
 
@@ -133,7 +133,7 @@ describe('features/bendpoints', function() {
 
       // then
       expect(bendpoints.moveBendpoint.called).to.be.true;
-      expect(bendpoints.moveIntersection.called).to.be.false;
+      expect(bendpoints.moveConnectionSegment.called).to.be.false;
 
     }));
 
@@ -159,9 +159,8 @@ describe('features/bendpoints', function() {
 
       // then
       expect(bendpoints.moveBendpoint.called).to.be.false;
-      expect(bendpoints.moveIntersection.called).to.be.true;
+      expect(bendpoints.moveConnectionSegment.called).to.be.true;
 
     }));
-
   });
 });
