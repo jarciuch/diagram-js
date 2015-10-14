@@ -497,13 +497,16 @@ svg.drop-not-ok {
   display: none !important;
 }
 
+.djs-dragmarker.djs-dragging,
 .djs-bendpoint.djs-dragging {
   display: block;
   opacity: 1.0;
 }
 
+.djs-dragmarker.djs-dragging .djs-visual,
 .djs-bendpoint.djs-dragging .djs-visual {
   fill: yellow;
+  stroke-opacity: 0.5;
 }
 
 
