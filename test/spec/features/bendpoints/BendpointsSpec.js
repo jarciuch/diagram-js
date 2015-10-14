@@ -15,6 +15,10 @@ describe('features/bendpoints', function() {
 
   beforeEach(bootstrapDiagram({ modules: [ modelingModule, bendpointsModule, interactionModule, rulesModule ] }));
 
+  beforeEach(inject(function(dragging) {
+    dragging.setOptions({ manual: true });
+  }));
+
 
   var rootShape, shape1, shape2, shape3, connection, connection2;
 
@@ -72,6 +76,16 @@ describe('features/bendpoints', function() {
 
   describe('activation', function() {
 
+    beforeEach(inject(function(bendpoints) {
+      sinon.spy(bendpoints, 'moveIntersection');
+      sinon.spy(bendpoints, 'moveBendpoint');
+    }));
+
+    afterEach(inject(function(bendpoints) {
+      bendpoints.moveIntersection.restore();
+      bendpoints.moveBendpoint.restore();
+    }));
+
     it('should show on hover', inject(function(eventBus, canvas, elementRegistry) {
 
       // given
@@ -101,5 +115,53 @@ describe('features/bendpoints', function() {
       expect(layer.node.querySelectorAll('.djs-bendpoint').length).to.equal(4);
       expect(layer.node.querySelectorAll('.djs-dragmarker').length).to.equal(2);
     }));
+
+
+    it('should activate bendpoint move', inject(function(dragging, eventBus, elementRegistry, bendpoints) {
+
+      // when
+      eventBus.fire('element.hover', { element: connection, gfx: elementRegistry.getGraphics(connection) });
+      eventBus.fire('element.mousemove', {
+        element: connection,
+        originalEvent: canvasEvent({ x: 500, y: 250 })
+      });
+      eventBus.fire('element.mousedown', {
+        element: connection,
+        originalEvent: canvasEvent({ x: 500, y: 250 })
+      });
+      dragging.end();
+
+      // then
+      expect(bendpoints.moveBendpoint.called).to.be.true;
+      expect(bendpoints.moveIntersection.called).to.be.false;
+
+    }));
+
+
+    it('should activate parallel move', inject(function(dragging, eventBus, elementRegistry, bendpoints) {
+
+      // precondition
+      var intersectionStart = connection.waypoints[0].x,
+          intersectionEnd = connection.waypoints[1].x,
+          intersectionMid = intersectionEnd - (intersectionEnd - intersectionStart) / 2;
+
+      // when
+      eventBus.fire('element.hover', { element: connection, gfx: elementRegistry.getGraphics(connection) });
+      eventBus.fire('element.mousemove', {
+        element: connection,
+        originalEvent: canvasEvent({ x: intersectionMid, y: 250 })
+      });
+      eventBus.fire('element.mousedown', {
+        element: connection,
+        originalEvent: canvasEvent({ x: intersectionMid, y: 250 })
+      });
+      dragging.end();
+
+      // then
+      expect(bendpoints.moveBendpoint.called).to.be.false;
+      expect(bendpoints.moveIntersection.called).to.be.true;
+
+    }));
+
   });
 });
