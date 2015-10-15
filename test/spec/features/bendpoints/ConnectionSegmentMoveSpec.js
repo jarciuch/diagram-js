@@ -7,59 +7,82 @@ var canvasEvent = require('../../../util/MockEvents').createCanvasEvent;
 /* global bootstrapDiagram, inject */
 
 var bendpointsModule = require('../../../../lib/features/bendpoints'),
-    modelingModule = require('../../../../lib/features/modeling'),
-    selectModule = require('../../../../lib/features/selection');
+    modelingModule =   require('../../../../lib/features/modeling'),
+    selectModule =     require('../../../../lib/features/selection');
 
+var layoutModule = {
+  connectionDocking: [
+    'type',
+    require('../../../../lib/layout/CroppingConnectionDocking')
+  ]
+};
+
+
+function setupShapes(elementFactory, canvas) {
+  var rootShape, shape1, shape2, connection;
+
+  rootShape = elementFactory.createRoot({
+    id: 'root'
+  });
+  canvas.setRootElement(rootShape);
+
+  shape1 = elementFactory.createShape({
+    id: 'shape1', type: 'A',
+    x: 100, y: 400,
+    width: 200, height: 100
+  });
+  canvas.addShape(shape1, rootShape);
+
+  shape2 = elementFactory.createShape({
+    id: 'shape2', type: 'A',
+    x: 600, y: 50,
+    width: 100, height: 200
+  });
+  canvas.addShape(shape2, rootShape);
+
+  connection = elementFactory.createConnection({
+    id: 'connection',
+    waypoints: [
+      { x: 200, y: 450 },
+      { x: 400, y: 450 },
+      { x: 400, y: 150 },
+      { x: 650, y: 150 }
+    ],
+    source: shape1,
+    target: shape2
+  });
+  canvas.addConnection(connection, rootShape);
+
+  return {
+    rootShape: rootShape,
+    source: shape1,
+    target: shape2,
+    connection: connection
+  };
+}
 
 describe('features/bendpoints - parallel move', function() {
 
-  beforeEach(bootstrapDiagram({ modules: [ bendpointsModule, modelingModule, selectModule ] }));
+  describe('modeling', function() {
 
-  beforeEach(inject(function(dragging) {
-    dragging.setOptions({ manual: true });
-  }));
+    beforeEach(bootstrapDiagram({ modules: [ bendpointsModule, modelingModule, selectModule ]}));
 
-
-  var rootShape, shape1, shape2, connection;
-
-  beforeEach(inject(function(elementFactory, canvas) {
-
-    rootShape = elementFactory.createRoot({
-      id: 'root'
-    });
-    canvas.setRootElement(rootShape);
-
-    shape1 = elementFactory.createShape({
-      id: 'shape1', type: 'A',
-      x: 100, y: 400,
-      width: 200, height: 100
-    });
-    canvas.addShape(shape1, rootShape);
-
-    shape2 = elementFactory.createShape({
-      id: 'shape2', type: 'A',
-      x: 600, y: 50,
-      width: 100, height: 200
-    });
-    canvas.addShape(shape2, rootShape);
-
-    connection = elementFactory.createConnection({
-      id: 'connection',
-      waypoints: [
-        { x: 200, y: 450 },
-        { x: 400, y: 450 },
-        { x: 400, y: 150 },
-        { x: 650, y: 150 }
-      ],
-      source: shape1,
-      target: shape2
-    });
-    canvas.addConnection(connection, rootShape);
-
-  }));
+    beforeEach(inject(function(dragging) {
+      dragging.setOptions({ manual: true });
+    }));
 
 
-  describe.only('modeling', function() {
+    var rootShape, shape1, shape2, connection;
+
+    beforeEach(inject(function(elementFactory, canvas) {
+      var diagram = setupShapes(elementFactory, canvas);
+
+      rootShape = diagram.rootShape;
+      shape1 = diagram.source;
+      shape2 = diagram.target;
+      connection = diagram.connection;
+    }));
+
 
     it('should vertical move first segment, updating connection start',
        inject(function(canvas, connectionSegmentMove, dragging) {
@@ -235,6 +258,58 @@ describe('features/bendpoints - parallel move', function() {
 
       // then: the docking point needs to stay untouched
       expect(connection).to.have.endDocking(originalDocking);
+    }));
+  });
+
+
+  describe("with connectionDocking support", function() {
+
+    var diagram;
+
+    beforeEach(bootstrapDiagram({ modules: [ bendpointsModule, modelingModule, selectModule, layoutModule ]}));
+
+    beforeEach(inject(function(dragging) {
+      dragging.setOptions({ manual: true });
+    }));
+
+    beforeEach(inject(function(elementFactory, canvas) {
+      diagram = setupShapes(elementFactory, canvas);
+    }));
+
+
+    it('should crop connection to source',
+       inject(function(canvas, connectionSegmentMove, dragging) {
+
+      // given
+      var shapeCornerX = diagram.source.x + diagram.source.width;
+
+      // when
+      connectionSegmentMove.start(canvasEvent({ x: 275, y: 450 }), diagram.connection, 1);
+      dragging.move(canvasEvent({ x: 275, y: 430}));
+      // cropping is applied from the second move event on
+      dragging.move(canvasEvent({ x: 275, y: 470}));
+      dragging.end();
+
+      // then
+      expect(diagram.connection.waypoints[0].x).to.eql(shapeCornerX);
+    }));
+
+
+    it('should crop connection to target',
+       inject(function(canvas, connectionSegmentMove, dragging) {
+
+      // given
+      var shapeCornerX = diagram.target.x;
+
+      // when
+      connectionSegmentMove.start(canvasEvent({ x: 425, y: 150 }), diagram.connection, 3);
+      dragging.move(canvasEvent({ x: 425, y: 210 }));
+      // cropping is applied from the second move event on
+      dragging.move(canvasEvent({ x: 425, y: 230 }));
+      dragging.end();
+
+      // then
+      expect(diagram.connection.waypoints[3].x).to.eql(shapeCornerX);
     }));
 
   });
