@@ -312,6 +312,39 @@ describe('features/bendpoints - parallel move', function() {
       expect(diagram.connection.waypoints[3].x).to.eql(shapeCornerX);
     }));
 
-  });
 
+    it('should crop first segment on fast movement',
+       inject(function(canvas, connectionSegmentMove, dragging) {
+
+      // given
+      var shapeCornerY = diagram.source.y;
+
+      // when
+      connectionSegmentMove.start(canvasEvent({ x: 275, y: 450 }), diagram.connection, 1);
+      //dragging.move(canvasEvent({ x: 275, y: 430}));
+      dragging.move(canvasEvent({ x: 275, y: 350}));
+      dragging.end();
+
+      // then
+      expect(diagram.connection.waypoints[0].y).to.eql(shapeCornerY);
+    }));
+
+
+    it('should crop last segment on fast movement',
+       inject(function(canvas, connectionSegmentMove, dragging) {
+
+      // given
+      var shapeCornerY = diagram.target.y + diagram.target.height;
+
+      // when
+      connectionSegmentMove.start(canvasEvent({ x: 425, y: 150 }), diagram.connection, 3);
+      //dragging.move(canvasEvent({ x: 425, y: 210 }));
+      dragging.move(canvasEvent({ x: 425, y: 350 }));
+      dragging.end();
+
+      // then
+      expect(diagram.connection.waypoints[4].y).to.eql(shapeCornerY);
+    }));
+
+  });
 });
